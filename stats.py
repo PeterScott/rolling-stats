@@ -1,5 +1,7 @@
 """Rolling statistics calculations, for potentially very long time series."""
 
+import math
+
 ### Statistics for a sample that can only be added to.
 
 class MeanVariance:
@@ -124,3 +126,52 @@ class MovingAverage:
 #     def population_variance(self):
 #         return self.M2 / self.window.size
 
+
+### Binned median calculation
+
+class BinnedData:
+    """Store a growing sample of data, where the values all can be
+    sorted into some number of bins."""
+    def __init__(self, min_value, max_value, nbins):
+        """Initialize, for values in the interval [min_value,
+        max_value), with a given number of bins. Note that min_value
+        is an inclusive lower limit, but max_value is an exclusive
+        upper limit."""
+        self.min_value = float(min_value)
+        self.max_value = float(max_value)
+        self.bin_range = self.max_value - self.min_value
+        self.nbins = nbins
+        self.bins = [0.0] * nbins
+
+    def add(self, value):
+        """Add a value to the set."""
+        if value < self.min_value or value >= self.max_value:
+            raise ValueError, "Value %f out of bounds [%f, %f)" % \
+                              (value, self.min_value, self.max_value)
+
+        bin = int(math.floor((value - self.min_value) 
+                             / self.bin_range * self.nbins))
+        self.bins[bin] += 1
+
+
+# class BinnedMedian:
+#     """Calculate the median of a growing sample, where the values all
+#     can be sorted into some number of bins. If the number of bins
+#     equals the number of possible sample values -- if each possible
+#     value gets a unique bin -- then this gives the exact
+#     median. Otherwise, you can trade off memory versus precision by
+#     changing the number of bins."""
+# 
+#     def __init__(self, min_value, max_value, nbins):
+#         """Initialize, for values in the interval [min_value,
+#         max_value), with a given number of bins. Note that min_value
+#         is an inclusive lower limit, but max_value is an exclusive
+#         upper limit."""
+#         self.data = BinnedData(min_value, max_value, nbins)
+#         
+#     def add(self, value):
+#         """Add a value to the set."""
+#         self.data.add(value)
+#         # FIXME: update median here.
+
+            
