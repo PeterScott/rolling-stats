@@ -1,5 +1,6 @@
 # Tests for rolling stats library.
 
+import simplestats
 import stats
 import unittest
 
@@ -50,6 +51,26 @@ class TestMovingAverage(unittest.TestCase):
 
         # Sum of last 5 digits in sequence
         self.assertAlmostEqual(6.4, ma.mean)
+        
+        
+# class TestMovingMeanVariance(unittest.TestCase):
+#     def test_pidigits(self):
+#         mmv = stats.MovingMeanVariance(5)
+#         
+#         for i, x in enumerate(pidigits[1:]):
+#             mmv.add(x)
+#             # Don't assert with only one value because sample variance returns a division by zero at that point.
+#             if i:
+#                 expected_sample_variance, expected_population_variance = simplestats.variance(pidigits[max(0, i - 4):i+1])
+#                 self.assertAlmostEqual(
+#                     expected_sample_variance, mmv.sample_variance,
+#                     msg="Sample variance failed at index %d: %f != %f" % (
+#                         i, expected_sample_variance, mmv.sample_variance))
+#                 self.assertAlmostEqual(
+#                     expected_sample_variance, mmv.sample_variance,
+#                     msg="Population variance failed at index %d: %f != %f" % (
+#                         i, expected_sample_variance, mmv.sample_variance))
+        
 
 
 if __name__ == '__main__':
