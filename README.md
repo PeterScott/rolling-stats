@@ -15,3 +15,10 @@ the sample with `add(x)`, and use the `mean`, `sample_variance`, and
 `MovingAverage`: Compute an n-sample moving average. Initialize with
 `MovingAverage(n)`, and add values with `add(x)`. Use the `mean`
 property to get the moving average.
+
+Testing
+-------
+
+Run the unit test suite with
+
+    $ python tests.py
