@@ -11,7 +11,8 @@ class TestSampleWindow(unittest.TestCase):
     def test_window(self):
         window = stats.SampleWindow(10)
         for i in range(100):
-            evicted, size = window.add(i)
+            evicted = window.add(i)
+            size = window.size
             if i < 10:
                 self.assertEqual(i + 1, size)
                 self.assertEqual(None, evicted)
