@@ -1,5 +1,7 @@
 """Rolling statistics calculations, for potentially very long time series."""
 
+### Statistics for a sample that can only be added to.
+
 class MeanVariance:
     """Compute mean and variance for a series of values. The series of
     values can only be added to."""
@@ -29,39 +31,62 @@ class MeanVariance:
     def population_variance(self):
         return self.M2 / self.n
 
+
+### Windowed statistics -- only consider last n samples.
+
+class SampleWindow:
+    """Helper class for holding a window of n samples."""
+    
+    def __init__(self, n):
+        """Initialize, where n is the number of samples in the
+        window."""
+        self.n = n                # Number of samples
+        self.samples = [None] * n # Circular buffer
+        self.i = 0                # Insertion index into buffer
+        self.full = False         # Has the buffer been filled?
+
+    def add(self, x):
+        """Add a value to the window, and return (evicted, size) where
+        `evicted` is the element which was removed from the window (or
+        None), and `size` is the current number of samples in the
+        window, which may be less than n if the window has not yet
+        been filled up."""
+        evicted = self.samples[self.i]
+        self.samples[self.i] = x
+        self.i += 1
+        if self.i == self.n:
+            self.full = True
+            self.i = 0
+        
+        if self.full:
+            size = self.n
+        else:
+            size = self.i
+
+        return evicted, size
+
+
 class MovingAverage:
     """Compute an n-sample moving average. Before n samples are added,
     averages all samples that have been received yet."""
     
     def __init__(self, n):
         """Initialize, where n is the number of samples to average."""
-        self.n = n                # Number of samples
-        self.samples = [None] * n # Circular buffer
-        self.i = 0                # Insertion index into buffer
-        self.sum = 0.0            # Sum of values
-        self.full = False         # Has the buffer been filled?
+        self.window = SampleWindow(n)
+        self.sum = 0.0
+        self.size = 0
 
     def add(self, value):
-        # Value leaving the set
-        evicted = self.samples[self.i]
+        evicted, size = self.window.add(value)
         if evicted is not None:
-            self.sum -= evicted
-        
-        # Add new value to the circular buffer, update sum
-        self.samples[self.i] = value
-        self.i += 1
-        if self.i == self.n:
-            self.full = True
-            self.i = 0
+            value -= evicted
         self.sum += value
+        self.size = size
 
     @property
     def mean(self):
-        if not self.full and self.i == 0:
+        if self.size == 0:
             # Set is empty. FIXME: should this raise an exception?
             return 0.0
+        return self.sum / self.size
 
-        if self.full:
-            return self.sum / self.n
-        else:
-            return self.sum / self.i
