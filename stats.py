@@ -90,6 +90,10 @@ class MovingAverage:
             return 0.0
         return self.sum / self.window.size
 
+## FIXME: There should be a way to do windowed mean and variance
+## calculations, but the code doesn't do it. I think it's just a
+## mistake in my equations somewhere.
+
 # class MovingMeanVariance:
 #     """Compute the n-sample moving mean and variance of a series of
 #     values."""
