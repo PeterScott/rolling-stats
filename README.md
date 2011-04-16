@@ -6,6 +6,31 @@ long series of values. It's still pretty rough. All the classes for
 computing rolling statistics perform all their operations in constant
 time, making them useful for dealing with very large streams of data.
 
+Demo
+----
+
+This will take some numbers and compute their mean and variance:
+
+    >>> import stats
+    >>> mv = stats.MeanVariance()
+    >>> for x in [3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5, 8, 7]:
+    ...     mv.add(x)
+    ... 
+    >>> mv.mean
+    4.5384615384615383
+    >>> mv.sample_variance
+    6.435897435897437
+    >>> mv.population_variance
+    5.9408284023668649
+
+Note that `MeanVariance` does not store the numbers themselves, so the
+amount of memory it uses stays constant no matter how many numbers are
+added.
+
+There are other classes for computing an n-sample moving average, and
+medians of integers or binned real numbers within a given range; see
+below for details.
+
 Current classes
 ---------------
 
