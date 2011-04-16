@@ -142,17 +142,30 @@ class BinnedData:
         self.bin_range = self.max_value - self.min_value
         self.nbins = nbins
         self.bins = [0.0] * nbins
+        self.size = 0
 
     def add(self, value):
         """Add a value to the set."""
+        bin = self.bin(value)
+        self.bins[bin] += 1
+        self.size += 1
+
+    def bin(self, value):
+        """Return the bin index of a given value. Throws ValueError if
+        the value is out of range."""
         if value < self.min_value or value >= self.max_value:
             raise ValueError, "Value %f out of bounds [%f, %f)" % \
                               (value, self.min_value, self.max_value)
 
-        bin = int(math.floor((value - self.min_value) 
-                             / self.bin_range * self.nbins))
-        self.bins[bin] += 1
+        return int(math.floor((value - self.min_value) 
+                              / self.bin_range * self.nbins))
 
+    def unbin(self, bin):
+        """Return the average value that would be sorted into the
+        given bin, assuming uniform distribution."""
+        bin_start = (bin / float(self.nbins) * self.bin_range) + self.min_value
+        bin_width = self.bin_range / self.nbins
+        return bin_start + bin_width / 2.0
 
 # class BinnedMedian:
 #     """Calculate the median of a growing sample, where the values all
@@ -168,10 +181,52 @@ class BinnedData:
 #         is an inclusive lower limit, but max_value is an exclusive
 #         upper limit."""
 #         self.data = BinnedData(min_value, max_value, nbins)
+#         # Track median and which bin has the median.
+#         self.median = None
+#         self.median_bin = 0
+#         self.median_offset = 0
+#         # Number of elements before and after the median
+#         self.before_median = 0
+#         self.after_median  = 0
+#         # Equal values are put either before or after the median, in
+#         # an alternating fashion. This variable controls that.
+#         self.flipflop = False
 #         
 #     def add(self, value):
 #         """Add a value to the set."""
 #         self.data.add(value)
-#         # FIXME: update median here.
-
-            
+#         bin = data.bin(value)
+# 
+#         if self.median is None:
+#             # Only one element; it becomes the median.
+#             self.median = value
+#             self.median_bin = bin
+#         else:
+#             # Update before/after median element counts
+#             if bin < self.median_bin:
+#                 self.before_median += 1
+#             elif bin > self.median_bin:
+#                 self.after_median += 1
+#             else:
+#                 if self.flipflop:
+#                     self.before_median += 1
+#                     self.flipflop = False
+#                 else:                    
+#                     self.after_median += 1
+#                     self.flipflop = True
+# 
+#             # Move median if necessary
+#             if self.before_median - self.after_median == 2:
+#                 self.before_median -= 1
+#                 self.after_median += 1
+#                 if self.median_offset = 0:
+#                     # Go left to first non-empty bin.
+#                     self.median_bin -= 1
+#                     while data.bins[self.median_bin] == 0:
+#                         self.median_bin -= 1
+#                     self.median_offset = data.bins[self.median_bin] - 1
+#                 self.median = data.unbin(self.median_bin)
+#             elif self.after_median - self.before_median == 2:
+#                 self.before_median += 1
+#                 self.after_median -= 1
+#                 pass            # Move median right
