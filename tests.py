@@ -3,6 +3,7 @@
 import simplestats
 import stats
 import unittest
+import random
 
 pidigits = "3141592653589793238462643383279502884197169"
 pidigits = [float(c) for c in pidigits]
@@ -72,6 +73,28 @@ class TestMovingAverage(unittest.TestCase):
 #                         i, expected_sample_variance, mmv.sample_variance))
         
 
+class TestBinnedMedian(unittest.TestCase):
+    def test_uniform(self):
+        # Insert uniformly distributed random values with known seed.
+        random.seed(123456)
+        bm = stats.BinnedMedian(5, 10, 10000)
+        for i in range(100000):
+            bm.add(random.uniform(5, 9.99999999))
+        self.assertAlmostEqual(bm.median, 7.50325)
+
+        # Now a smaller number of values
+        random.seed(123456)
+        bm = stats.BinnedMedian(5, 10, 10000)
+        for i in range(10):
+            bm.add(random.uniform(5, 9.99999999))
+        self.assertAlmostEqual(bm.median, 5.87325)
+
+        # Finally, fewer bins
+        random.seed(123456)
+        bm = stats.BinnedMedian(5, 10, 10)
+        for i in range(10000):
+            bm.add(random.uniform(5, 9.99999999))
+        self.assertAlmostEqual(bm.median, 5.75)
 
 if __name__ == '__main__':
     unittest.main()
