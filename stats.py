@@ -236,3 +236,18 @@ class BinnedMedian:
                         self.median_bin += 1
                     self.median_offset = 0
                 self.median = self.data.unbin(self.median_bin)
+
+class ExactBinnedMedian:
+    """Similar to BinnedMedian, but assumes that all input values are
+    integers between min_value and max_value, inclusive. Gives integer
+    output."""
+    def __init__(self, min_value, max_value):
+        self.bm = BinnedMedian(min_value, max_value + 1,
+                               (max_value - min_value) + 1)
+    
+    def add(self, value):
+        self.bm.add(value)
+
+    @property
+    def median(self):
+        return int(self.bm.median)

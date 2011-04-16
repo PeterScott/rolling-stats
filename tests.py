@@ -96,5 +96,12 @@ class TestBinnedMedian(unittest.TestCase):
             bm.add(random.uniform(5, 9.99999999))
         self.assertAlmostEqual(bm.median, 5.75)
 
+class TestExactBinnedMedian(unittest.TestCase):
+    def test_pidigits(self):
+        eb = stats.ExactBinnedMedian(0, 9)
+        for x in pidigits:
+            eb.add(x)
+        self.assertEqual(eb.median, simplestats.median(pidigits))
+
 if __name__ == '__main__':
     unittest.main()
