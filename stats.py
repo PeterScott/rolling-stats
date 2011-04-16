@@ -44,13 +44,11 @@ class SampleWindow:
         self.samples = [None] * n # Circular buffer
         self.i = 0                # Insertion index into buffer
         self.full = False         # Has the buffer been filled?
+        self.size = 0             # Number of samples in window
 
     def add(self, x):
-        """Add a value to the window, and return (evicted, size) where
-        `evicted` is the element which was removed from the window (or
-        None), and `size` is the current number of samples in the
-        window, which may be less than n if the window has not yet
-        been filled up."""
+        """Add a value to the window, and return the element which was
+        removed from the window (or None)."""
         evicted = self.samples[self.i]
         self.samples[self.i] = x
         self.i += 1
@@ -58,12 +56,13 @@ class SampleWindow:
             self.full = True
             self.i = 0
         
+        # Update number of samples in window
         if self.full:
-            size = self.n
+            self.size = self.n
         else:
-            size = self.i
+            self.size = self.i
 
-        return evicted, size
+        return evicted
 
 
 class MovingAverage:
@@ -77,16 +76,51 @@ class MovingAverage:
         self.size = 0
 
     def add(self, value):
-        evicted, size = self.window.add(value)
+        evicted = self.window.add(value)
         if evicted is not None:
             value -= evicted
         self.sum += value
-        self.size = size
 
     @property
     def mean(self):
-        if self.size == 0:
+        if self.window.size == 0:
             # Set is empty. FIXME: should this raise an exception?
             return 0.0
-        return self.sum / self.size
+        return self.sum / self.window.size
+
+# class MovingMeanVariance:
+#     """Compute the n-sample moving mean and variance of a series of
+#     values."""
+# 
+#     def __init__(self, n):
+#         """Initialize, where n is the number of samples to average."""
+#         self.window = SampleWindow(n)
+#         self.sum = 0.0
+#         self.M2 = 0.0
+#         self.mean = 0.0
+# 
+#     def add(self, value):
+#         # FIXME: the idea here is to maintain M2, a count of the sums
+#         # of the squares of the differences from the current mean, and
+#         # to update this with every value entering or leaving the
+#         # window. But I messed up the math. I'll come back to this
+#         # later.
+#         evicted = self.window.add(value)
+#         if evicted is not None:
+#             self.sum -= evicted
+#         self.sum += value
+#         delta = value - self.mean
+#         self.mean = self.sum / self.window.size
+# 
+#         if evicted is not None:
+#             self.M2 -= (evicted - self.mean)**2
+#         self.M2 += delta * (value - self.mean)
+# 
+#     @property
+#     def sample_variance(self):
+#         return self.M2 / (self.window.size - 1)
+# 
+#     @property
+#     def population_variance(self):
+#         return self.M2 / self.window.size
 
